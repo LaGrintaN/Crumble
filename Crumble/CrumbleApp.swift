@@ -44,5 +44,9 @@ struct AppContentView: View {
                 }
             }
         }
+        .onOpenURL { url in
+            // Handle OAuth callback URLs
+            supabaseManager.handleURL(url)
+        }
     }
 }

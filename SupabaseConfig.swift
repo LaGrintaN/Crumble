@@ -15,8 +15,13 @@ struct SupabaseConfig {
     
     // MARK: - Validation
     static var isValid: Bool {
-        return !supabaseURL.contains("https://mxacpbnwtxuwfvexuvjb.supabase.co") &&
-               !supabaseAnonKey.contains("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14YWNwYm53dHh1d2Z2ZXh1dmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMjg3ODYsImV4cCI6MjA3MTYwNDc4Nn0.5hrgVmccSx8h5784-pXDHpaJiueL1gz7ZGH6DxRec_M")
+        let urlValid = !supabaseURL.isEmpty
+        let keyValid = !supabaseAnonKey.isEmpty
+        
+        print("🔍 Debug: URL valid: \(urlValid), Key valid: \(keyValid)")
+        print("�� Debug: URL length: \(supabaseURL.count), Key length: \(supabaseAnonKey.count)")
+        
+        return urlValid && keyValid
     }
     
     // MARK: - Security Note

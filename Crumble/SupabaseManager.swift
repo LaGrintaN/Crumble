@@ -16,8 +16,13 @@ class SupabaseManager: ObservableObject {
     }
     
     private func setupClient() {
+        print("🔍 Debug: Setting up Supabase client...")
+        print("🔍 Debug: URL: \(SupabaseConfig.supabaseURL)")
+        print("🔍 Debug: Key length: \(SupabaseConfig.supabaseAnonKey.count)")
+        
         guard SupabaseConfig.isValid else {
             print("❌ Supabase configuration is invalid!")
+            print("🔍 Debug: isValid returned false")
             return
         }
         
@@ -49,11 +54,9 @@ class SupabaseManager: ObservableObject {
             )
             
             await MainActor.run {
-                if response.user != nil {
-                    self.currentUser = response.user
-                    self.isAuthenticated = true
-                    print("✅ User signed up successfully!")
-                }
+                self.currentUser = response.user
+                self.isAuthenticated = true
+                print("✅ User signed up successfully!")
                 self.isLoading = false
             }
         } catch {
@@ -78,11 +81,9 @@ class SupabaseManager: ObservableObject {
             )
             
             await MainActor.run {
-                if response.user != nil {
-                    self.currentUser = response.user
-                    self.isAuthenticated = true
-                    print("✅ User signed in successfully!")
-                }
+                self.currentUser = response.user
+                self.isAuthenticated = true
+                print("✅ User signed in successfully!")
                 self.isLoading = false
             }
         } catch {
@@ -129,6 +130,59 @@ class SupabaseManager: ObservableObject {
                 self.isAuthenticated = false
                 print("ℹ️ No active session")
             }
+        }
+    }
+    
+    // MARK: - Social Sign-In Methods
+    @MainActor
+    func signInWithApple() async throws {
+        guard let client = client else { throw AuthError.network }
+        try await client.auth.signInWithOAuth(
+            provider: .apple,
+            redirectTo: URL(string: "com.nicole.Crumble://auth-callback")
+        )
+    }
+    
+    @MainActor
+    func signInWithGoogle() async throws {
+        guard let client = client else { throw AuthError.network }
+        try await client.auth.signInWithOAuth(
+            provider: .google,
+            redirectTo: URL(string: "com.nicole.Crumble://auth-callback"),
+            scopes: "email profile"
+        )
+    }
+    
+    @MainActor
+    func signInWithFacebook() async throws {
+        guard let client = client else { throw AuthError.network }
+        try await client.auth.signInWithOAuth(
+            provider: .facebook,
+            redirectTo: URL(string: "com.nicole.Crumble://auth-callback"),
+            scopes: "email public_profile"
+        )
+    }
+    
+    // MARK: - URL Handling
+    func handleURL(_ url: URL) {
+        client?.handle(url)
+    }
+}
+
+// MARK: - Auth Errors
+enum AuthError: Error, LocalizedError {
+    case network
+    case userCancelled
+    case unknown
+    
+    var errorDescription: String? {
+        switch self {
+        case .network:
+            return "Network error. Please check your connection."
+        case .userCancelled:
+            return "Sign-in was cancelled."
+        case .unknown:
+            return "Something went wrong. Please try again."
         }
     }
 }

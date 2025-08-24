@@ -16,6 +16,26 @@ struct ContentView: View {
             Color.crumbleBackground
                 .ignoresSafeArea()
             
+            // Debug Test
+            VStack {
+                Text("Debug Test")
+                    .font(.rubikTitle)
+                    .foregroundColor(.crumblePrimary)
+                
+                Text("Supabase URL: \(SupabaseConfig.supabaseURL)")
+                    .font(.rubikBody)
+                    .foregroundColor(.crumbleTextSecondary)
+                
+                Text("Config Valid: \(SupabaseConfig.isValid ? "Yes" : "No")")
+                    .font(.rubikBody)
+                    .foregroundColor(.crumbleTextSecondary)
+            }
+            .onAppear {
+                print("🔍 ContentView appeared")
+                print("🔍 Supabase URL: \(SupabaseConfig.supabaseURL)")
+                print("🔍 Config Valid: \(SupabaseConfig.isValid)")
+            }
+            
             VStack(spacing: DesignSystem.Spacing.lg) {
                 // Header with Logout
                 HStack {
