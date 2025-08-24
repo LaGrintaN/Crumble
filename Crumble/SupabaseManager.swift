@@ -41,8 +41,8 @@ class SupabaseManager: ObservableObject {
     
     // MARK: - Authentication Methods
     
-    func signUp(email: String, password: String) async {
-        guard let client = client else { return }
+    func signUp(email: String, password: String) async throws {
+        guard let client = client else { throw AuthError.network }
         
         isLoading = true
         errorMessage = nil
@@ -61,15 +61,14 @@ class SupabaseManager: ObservableObject {
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = error.localizedDescription
                 self.isLoading = false
-                print("❌ Sign up error: \(error.localizedDescription)")
             }
+            throw error
         }
     }
     
-    func signIn(email: String, password: String) async {
-        guard let client = client else { return }
+    func signIn(email: String, password: String) async throws {
+        guard let client = client else { throw AuthError.network }
         
         isLoading = true
         errorMessage = nil
@@ -88,10 +87,9 @@ class SupabaseManager: ObservableObject {
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = error.localizedDescription
                 self.isLoading = false
-                print("❌ Sign in error: \(error.localizedDescription)")
             }
+            throw error
         }
     }
     
@@ -173,6 +171,12 @@ class SupabaseManager: ObservableObject {
 enum AuthError: Error, LocalizedError {
     case network
     case userCancelled
+    case invalidEmailFormat
+    case wrongEmailOrPassword
+    case userNotFound
+    case weakPassword
+    case emailAlreadyUsed
+    case timeout
     case unknown
     
     var errorDescription: String? {
@@ -181,8 +185,24 @@ enum AuthError: Error, LocalizedError {
             return "Network error. Please check your connection."
         case .userCancelled:
             return "Sign-in was cancelled."
+        case .invalidEmailFormat:
+            return "That doesn't look like an email."
+        case .wrongEmailOrPassword:
+            return "Wrong email or password."
+        case .userNotFound:
+            return "No account with this email."
+        case .weakPassword:
+            return "Password is too weak."
+        case .emailAlreadyUsed:
+            return "This email is already in use."
+        case .timeout:
+            return "This is taking too long. Try again."
         case .unknown:
             return "Something went wrong. Please try again."
         }
+    }
+    
+    var localizedDescription: String {
+        return errorDescription ?? "Unknown error occurred"
     }
 }
